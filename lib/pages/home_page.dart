@@ -1,5 +1,7 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:interactive_slider/interactive_slider.dart';
 import 'package:just_audio/just_audio.dart';
 
 enum AudioSourceOption { Network, Asset }
@@ -42,12 +44,8 @@ class _HomePageState extends State<HomePage> {
               children: [
                 _sourceSelect(),
                 _progessBar(),
-                Row(
-                  children: [
-                    _controlButtons(),
-                    _playbackControlButton(),
-                  ],
-                )
+                _playbackControlButton(),
+                _controlButtons(),
               ]),
         ),
       ),
@@ -144,53 +142,62 @@ class _HomePageState extends State<HomePage> {
         StreamBuilder(
           stream: _player.speedStream,
           builder: (context, snapshot) {
-            return Row(
-              children: [
-                Column(
-                  children: [
-                    const Icon(
-                      Icons.speed,
-                    ),
-                    Text("${snapshot.data?.toStringAsFixed(1)}")
-                  ],
-                ),
-                Slider(
-                  min: 0.5,
-                  max: 2,
-                  value: snapshot.data ?? 1,
-                  divisions: 4,
-                  onChanged: (value) async {
-                    await _player.setSpeed(value);
-                  },
-                ),
-              ],
+            return InteractiveSlider(
+              startIcon: const Icon(Icons.speed),
+              centerIcon: const Text('Speed'),
+              endIcon: Text("${snapshot.data?.toStringAsFixed(1)}"),
+              min: 0.5,
+              max: 2,
+              initialProgress: 1,
+              onChanged: (value) async {
+                await _player.setSpeed(value);
+              },
             );
+            // Slider(
+            //       min: 0.5,
+            //       max: 2,
+            //       value: snapshot.data ?? 1,
+            //       divisions: 4,
+            //       onChanged: (value) async {
+            //         await _player.setSpeed(value);
+            //       },
+            //     ),
           },
         ),
         StreamBuilder(
           stream: _player.volumeStream,
           builder: (context, snapshot) {
-            return Row(
-              children: [
-                Column(
-                  children: [
-                    const Icon(
-                      Icons.volume_up,
-                    ),
-                    Text("${snapshot.data?.toStringAsFixed(1)}")
-                  ],
-                ),
-                Slider(
-                  min: 0,
-                  max: 3,
-                  value: snapshot.data ?? 1,
-                  divisions: 4,
-                  onChanged: (value) async {
-                    await _player.setVolume(value);
+            return InteractiveSlider(
+              startIcon: IconButton(
+                  onPressed: () async {
+                    await _player.setVolume(0);
                   },
-                ),
-              ],
+                  icon: snapshot.data == 0
+                      ? Icon(CupertinoIcons.volume_off)
+                      : Icon(CupertinoIcons.volume_down)),
+              centerIcon: const Text('Volume'),
+              endIcon: Column(
+                children: [
+                  const Icon(CupertinoIcons.volume_up),
+                  Text("${snapshot.data?.toStringAsFixed(1)}"),
+                ],
+              ),
+              min: 0,
+              max: 3,
+              initialProgress: 1,
+              onChanged: (value) async {
+                await _player.setVolume(value);
+              },
             );
+            //  Slider(
+            //       min: 0,
+            //       max: 3,
+            //       value: snapshot.data ?? 1,
+            //       divisions: 4,
+            //       onChanged: (value) async {
+            //         await _player.setVolume(value);
+            //       },
+            //     ),
           },
         ),
       ],

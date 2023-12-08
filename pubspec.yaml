@@ -16,6 +16,8 @@ dependencies:
   just_audio:
   audio_video_progress_bar:
 
+  interactive_slider:
+
 
 
 
